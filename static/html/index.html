@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content=
+  "text/html; charset=UTF-8" />
+  <link rel="stylesheet" href=
+  "http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.css"
+  type="text/css" />
+  <script src="http://code.jquery.com/jquery-1.5.2.min.js" type=
+  "text/javascript">
+</script>
+  <script type="text/javascript" src=
+  "http://github.com/cho45/jsdeferred/raw/master/jsdeferred.jquery.js">
+</script>
+  <script src=
+  "http://code.jquery.com/mobile/1.0a4.1/jquery.mobile-1.0a4.1.min.js"
+  type="text/javascript">
+</script>
+
+  <title>English - Plactice</title>
+  <style type="text/css">
+/*<![CDATA[*/
+  .term {font-size:32px;text-align:center}
+  /*]]>*/
+  </style>
+</head>
+
+<body>
+  <div data-role="page" id="home" data-theme="d">
+    <div data-role="header">
+      <h1>English - Plactice</h1>
+    </div>
+
+    <div data-role="content">
+      <ul data-role="listview" data-inset="true" data-theme="c"
+      data-dividertheme="b">
+        <li><a href="#aa" id="goto_aa" name="goto_aa">Level
+        AA</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div data-role="page" id="aa" data-theme="d">
+    <div data-role="header">
+      <h1>English - Plactice(AA)</h1><a href="#home" data-icon=
+      "home" data-iconpos="notext" data-direction="reverse" class=
+      "ui-btn-right jqm-home">Home</a>
+    </div>
+
+    <div data-role="content">
+      <a href="#" data-role="button" data-icon="star" id=
+      "english_term" class="term" name="english_term"></a>
+
+      <p id="japanese" class="term"></p>
+
+      <div data-role="fieldcontain">
+        <label for="slider">check:</label> <select name="slider"
+        id="slider" data-role="slider">
+          <option value="ok">
+            OK
+          </option>
+
+          <option value="ng">
+            NG
+          </option>
+        </select>
+      </div>
+    </div>
+  </div><script type="text/javascript" language="javascript">
+//<![CDATA[
+  // Add new property to javascript array object
+  Array.prototype.shuffle = function() {
+        for (var j, x, i = this.length; i; j = parseInt(Math.random() * i), x = this[--i], this[i] = this[j], this[j] = x);
+        return this;
+  };
+  $("#aa").live('pageshow',function(){
+        $.getJSON("http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20csv%20where%20url%3D'http%3A%2F%2Fenglishplactice.appspot.com%2Fdata%2Faa.csv'%20and%20columns%3D'english%2Cjapanese'&format=json&diagnostics=false").
+        next(function(response){
+                var data = {
+                        en    : [],
+                        en2ja : {},
+                };
+                $.each(response.query.results.row,function(i,row){
+                        data.en.push(row.english);
+                        data.en2ja[row.english] = row.japanese;
+                });
+                data.shuffled = data.en.shuffle();
+                data.index    = 0;
+                return data;
+        }).
+        next(function(data){
+                var displayTerm = function(e){
+                        var englishTerm = e.data.shuffled[e.data.index];
+                        $("a#english_term span.ui-btn-inner span.ui-btn-text").
+                        css('font-size',englishTerm.length > 10 ? "16px" : "32px").
+                        html(englishTerm);
+
+                        $("a#english_term").
+                        unbind('click').
+                        bind('click',e.data,goNext);
+
+                        $("p#japanese").empty();
+                };
+                var goNext = function(e){
+                        var englishTerm  = e.data.shuffled[e.data.index];
+                        $("a#english_term span.ui-btn-inner span.ui-btn-text").
+                        css('font-size','32px').
+                        html("NEXT");
+
+                        $("p#japanese").
+                        html(e.data.en2ja[englishTerm]);
+
+                        e.data.index++;
+                        if(e.data.index < e.data.shuffled.length){
+                                $("a#english_term").
+                                unbind('click').
+                                bind('click',e.data,displayTerm);
+                        }
+
+                };
+                displayTerm({data:data});
+        }).
+        error(function(e){
+        });
+  });
+  //]]>
+  </script>
+</body>
+</html>

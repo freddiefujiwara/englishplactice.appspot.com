@@ -1,0 +1,13 @@
+application: englishplactice
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /
+  static_files: static/html/index.html
+  upload: static/html/index.html
+
+- url: /data/aa.csv
+  static_files: static/data/aa.csv
+  upload: static/data/aa.csv
