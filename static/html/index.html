@@ -36,28 +36,57 @@
     <div data-role="content">
       <ul data-role="listview" data-inset="true" data-theme="c"
       data-dividertheme="b">
-        <li><a href="#aa" id="goto_aa" name="goto_aa">Level
-        AA</a></li>
+        <li><a href="#aa">Level AA</a></li>
+
+        <li><a href="#ng">NG List</a></li>
       </ul>
     </div>
   </div>
 
   <div data-role="page" id="aa" data-theme="d">
     <div data-role="header">
-      <h1>Level AA</h1><a href="#home" data-icon=
-      "home" data-iconpos="notext" data-direction="reverse" class=
+      <h1>Level AA</h1><a href="#home" data-icon="home"
+      data-iconpos="notext" data-direction="reverse" class=
       "ui-btn-right jqm-home">Home</a>
     </div>
 
     <div data-role="content">
       <a href="#" data-role="button" data-icon="star" id=
-      "english_term" class="term" name="english_term"></a>
+      "english_term_aa" class="term" name="english_term_aa"></a>
 
-      <p id="japanese" class="term"></p>
+      <p id="japanese_aa" class="term"></p>
 
       <div data-role="fieldcontain">
-        <label for="slider">check:</label> <select name="slider"
-        id="slider" data-role="slider">
+        <label for="slider">check:</label> <select id="okng_aa"
+        data-role="slider">
+          <option value="ok">
+            OK
+          </option>
+
+          <option value="ng">
+            NG
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div data-role="page" id="ng" data-theme="d">
+    <div data-role="header">
+      <h1>Level AA</h1><a href="#home" data-icon="home"
+      data-iconpos="notext" data-direction="reverse" class=
+      "ui-btn-right jqm-home">Home</a>
+    </div>
+
+    <div data-role="content">
+      <a href="#" data-role="button" data-icon="star" id=
+      "english_term_ng" class="term" name="english_term_ng"></a>
+
+      <p id="japanese_ng" class="term"></p>
+
+      <div data-role="fieldcontain">
+        <label for="slider">check:</label> <select id="okng_ng"
+        data-role="slider">
           <option value="ok">
             OK
           </option>
@@ -71,60 +100,111 @@
   </div><script type="text/javascript" language="javascript">
 //<![CDATA[
   // Add new property to javascript array object
-  Array.prototype.shuffle = function() {
-        for (var j, x, i = this.length; i; j = parseInt(Math.random() * i), x = this[--i], this[i] = this[j], this[j] = x);
-        return this;
-  };
-  $("#aa").live('pageshow',function(){
-        $.getJSON("http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20csv%20where%20url%3D'http%3A%2F%2Fenglishplactice.appspot.com%2Fdata%2Faa.csv'%20and%20columns%3D'english%2Cjapanese'&format=json&diagnostics=false").
-        next(function(response){
-                var data = {
-                        en    : [],
-                        en2ja : {},
-                };
-                $.each(response.query.results.row,function(i,row){
-                        data.en.push(row.english);
-                        data.en2ja[row.english] = row.japanese;
-                });
-                data.shuffled = data.en.shuffle();
-                data.index    = 0;
-                return data;
-        }).
-        next(function(data){
-                var displayTerm = function(e){
-                        var englishTerm = e.data.shuffled[e.data.index];
-                        $("a#english_term span.ui-btn-inner span.ui-btn-text").
-                        css('font-size',englishTerm.length > 10 ? "16px" : "32px").
-                        html(englishTerm);
+  //  $(document).ready(function(){
+    Array.prototype.shuffle = function() {
+      for (var j, x, i = this.length; i; j = parseInt(Math.random() * i), x = this[--i], this[i] = this[j], this[j] = x);
+      return this;
+    };
+    var pageController = function(data){
+      var changeOKNG = function(e){
+        if(e.data.lastOKNG != $(this).val()){
+          if('ok' == $(this).val()){
+            window.localStorage.removeItem(e.data.englishTerm);
+          }else{
+            window.localStorage.setItem(e.data.englishTerm,e.data.en2ja[e.data.englishTerm]);
+          }
+          e.data.lastOKNG = $(this).val();
+        }
+      };
+      var displayTerm = function(e){
+          var englishTerm = e.data.shuffled[e.data.index];
+          $("a#english_term_"+e.data.pageId+" span.ui-btn-inner span.ui-btn-text").
+          css('font-size',englishTerm.length > 10 ? "16px" : "32px").
+          html(englishTerm);
 
-                        $("a#english_term").
-                        unbind('click').
-                        bind('click',e.data,goNext);
+          $("a#english_term_"+e.data.pageId).
+          unbind('click').
+          bind('click',e.data,goNext);
 
-                        $("p#japanese").empty();
-                };
-                var goNext = function(e){
-                        var englishTerm  = e.data.shuffled[e.data.index];
-                        $("a#english_term span.ui-btn-inner span.ui-btn-text").
-                        css('font-size','32px').
-                        html("NEXT");
+          $("p#japanese_"+e.data.pageId).empty();
 
-                        $("p#japanese").
-                        html(e.data.en2ja[englishTerm]);
+          e.data.lastOKNG = $("#okng_"+e.data.pageId).val();
+          e.data.englishTerm = englishTerm;
+          $("#okng_"+e.data.pageId).
+          bind('change',e.data,changeOKNG).
+          val(window.localStorage.getItem(englishTerm) ? 
+                'ng' : 'ok').
+          slider('refresh');
+      };
+      var goNext = function(e){
+          var englishTerm  = e.data.shuffled[e.data.index];
+          $("a#english_term_"+e.data.pageId+" span.ui-btn-inner span.ui-btn-text").
+          css('font-size','32px').
+          html("NEXT");
 
-                        e.data.index++;
-                        if(e.data.index < e.data.shuffled.length){
-                                $("a#english_term").
-                                unbind('click').
-                                bind('click',e.data,displayTerm);
-                        }
+          $("p#japanese_"+e.data.pageId).
+          html(e.data.en2ja[englishTerm]);
 
-                };
-                displayTerm({data:data});
-        }).
-        error(function(e){
-        });
-  });
+          e.data.index++;
+          if(e.data.index  >= e.data.shuffled.length){
+                e.data.index = 0;
+          }
+          $("a#english_term_"+e.data.pageId).
+          unbind('click').
+          bind('click',e.data,displayTerm);
+
+          e.data.lastOKNG = $("#okng_"+e.data.pageId).val();
+          e.data.englishTerm = englishTerm;
+          $("#okng_"+e.data.pageId).
+          bind('change',e.data,changeOKNG).
+          val(window.localStorage.getItem(englishTerm) ? 
+                'ng' : 'ok').
+          slider('refresh');
+
+      };
+      displayTerm({data:data});
+    }
+    $("#aa").live('pageshow',function(){
+      $.getJSON("http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20csv%20where%20url%3D'http%3A%2F%2Fenglishplactice.appspot.com%2Fdata%2Faa.csv'%20and%20columns%3D'english%2Cjapanese'&format=json&diagnostics=false").
+      next(function(response){
+          var data = {
+              en  : [],
+              en2ja : {},
+          };
+          $.each(response.query.results.row,function(i,row){
+              data.en.push(row.english);
+              data.en2ja[row.english] = row.japanese;
+          });
+          data.shuffled = data.en.shuffle();
+          data.index  = 0;
+          data.pageId = "aa";
+          return data;
+      }).
+      next(pageController).
+      error(function(e){
+      });
+    });
+    $("#ng").live('pageshow',function(){
+      $.deferred.define();
+      next(function(response){
+          var data = {
+              en  : [],
+              en2ja : {},
+          };
+          for(var i = 0 ; i < window.localStorage.length ; i ++){
+                data.en.push(window.localStorage.key(i));
+                data.en2ja[window.localStorage.key(i)] = window.localStorage.getItem(window.localStorage.key(i));
+          }
+          data.shuffled = data.en.shuffle();
+          data.index  = 0;
+          data.pageId = "ng";
+          return data;
+      }).
+      next(pageController).
+      error(function(e){
+      });
+    });
+  //  });
   //]]>
   </script>
 </body>
