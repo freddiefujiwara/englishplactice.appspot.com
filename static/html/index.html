@@ -38,6 +38,8 @@
       data-dividertheme="b">
         <li><a href="#aa">Level AA</a></li>
 
+        <li><a href="#bb">Level BB</a></li>
+
         <li><a href="#ng">NG List</a></li>
       </ul>
     </div>
@@ -58,6 +60,34 @@
 
       <div data-role="fieldcontain">
         <label for="slider">check:</label> <select id="okng_aa"
+        data-role="slider">
+          <option value="ok">
+            OK
+          </option>
+
+          <option value="ng">
+            NG
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div data-role="page" id="bb" data-theme="d">
+    <div data-role="header">
+      <h1>Level BB</h1><a href="#home" data-icon="home"
+      data-iconpos="notext" data-direction="reverse" class=
+      "ui-btn-right jqm-home">Home</a>
+    </div>
+
+    <div data-role="content">
+      <a href="#" data-role="button" data-icon="star" id=
+      "english_term_bb" class="term" name="english_term_bb"></a>
+
+      <p id="japanese_bb" class="term"></p>
+
+      <div data-role="fieldcontain">
+        <label for="slider">check:</label> <select id="okng_bb"
         data-role="slider">
           <option value="ok">
             OK
@@ -178,6 +208,26 @@
           data.shuffled = data.en.shuffle();
           data.index  = 0;
           data.pageId = "aa";
+          return data;
+      }).
+      next(pageController).
+      error(function(e){
+      });
+    });
+    $("#bb").live('pageshow',function(){
+      $.getJSON("http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20csv%20where%20url%3D'http%3A%2F%2Fenglishplactice.appspot.com%2Fdata%2Fbb.csv'%20and%20columns%3D'english%2Cjapanese'&format=json&diagnostics=false").
+      next(function(response){
+          var data = {
+              en  : [],
+              en2ja : {},
+          };
+          $.each(response.query.results.row,function(i,row){
+              data.en.push(row.english);
+              data.en2ja[row.english] = row.japanese;
+          });
+          data.shuffled = data.en.shuffle();
+          data.index  = 0;
+          data.pageId = "bb";
           return data;
       }).
       next(pageController).
