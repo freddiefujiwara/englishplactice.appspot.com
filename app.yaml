@@ -11,3 +11,7 @@ handlers:
 - url: /data/aa.csv
   static_files: static/data/aa.csv
   upload: static/data/aa.csv
+
+- url: /data/bb.csv
+  static_files: static/data/bb.csv
+  upload: static/data/bb.csv
