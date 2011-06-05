@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html;charset=utf-8" />
+  <meta name="Description" content=
+  "A free open source web design by Christina Chun. Free for anyone to use as long as credits are intact." />
+  <meta name="Keywords" content=
+  "Open source web design by Christina Chunopen source web design,, christina chun, christinachun.com, www.christinachun.com" />
+  <meta name="Copyright" content="Christina Chun" />
+  <meta name="Designed By" content="ChristinaChun.com" />
+  <meta name="Language" content="English" />
+  <script type="text/javascript">
+//<![CDATA[
+  (function(){
+   var _UA = navigator.userAgent;
+   if (_UA.indexOf('iPhone') > -1 || _UA.indexOf('iPod') > -1) {
+     document.write('<link rel="stylesheet" href="stylesheets/smart.css">');
+   }else if(_UA.indexOf('Android') > -1){
+     document.write('<link rel="stylesheet" href="stylesheets/smart.css">');
+   }else{
+     document.write('<link rel="stylesheet" href="stylesheets/style.css">');
+   }
+  })();
+  //]]>
+  </script>
+
+  <title>Japanese to English Practice</title>
+</head>
+
+<body>
+  <div id="container">
+    <div class="contentheader"></div>
+
+    <div class="maincontainer">
+      <div id="menu">
+        <div id="nav"></div>
+      </div>
+
+      <div class="content">
+        <span id="japanese"></span>
+
+        <div id="music"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom"></div>
+
+  <div class="footer">
+    Designed By <a href="http://www.christinachun.com" title=
+    "Christina Chun - Digital Artist &amp; Web Designer">Christina
+    Chun</a> &copy; 2005-2006
+  </div><script type="text/javascript" src=
+  "http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js">
+</script><script type="text/javascript" src=
+"http://ejohn.org/files/jsdiff.js">
+</script><script type="text/javascript" src=
+"javascripts/jquery.jmp3.js">
+</script><script type="text/javascript">
+//<![CDATA[
+  var datas = {'min':1,'max':1,'texts':null};
+  Array.prototype.shuffle = function() {
+    for (var j, x, i = this.length; i; j = parseInt(Math.random() * i), x = this[--i], this[i] = this[j], this[j] = x);
+    return this;
+  };
+  $(document).ready(function(){
+    //initialize
+    $.getJSON("http://englishplactice.appspot.com/apis/texts.js?callback=?").then(function(data){
+      datas.texts = data;
+      datas.start = 1;
+      datas.end   = 30;
+      datas.max = Math.max.apply(null,$.map(data,function(text,index){
+        return text.id;
+      }));
+      var start = $("<select />");
+      var end = $("<select />");
+      for(var i = 1 ; i < datas.max ; i++){
+        start.append($("<option value='"+i+"'>"+i+"<\/option>"));
+        end.append($("<option value='"+i+"'>"+i+"<\/option>"));
+      }
+      start.val(datas.start);
+      end.val(datas.end);
+      $("#nav").
+      append($("<label for='start'>START:<\/label>")).
+      append(start).
+      append($("<label for='end'>END:<\/label>")).
+      append(end);
+      datas.currents = $.grep(datas.texts,function(text,index){
+        return datas.start <= text.id && text.id <= datas.end;
+      }).shuffle();
+      datas.index=0;
+    }).then(function(){
+        $('<input type="button" value="PREVIOUS" />').click(function(){
+          datas.index = (datas.index - 1 < datas.start - 1) ? datas.end  - 1: datas.index - 1;
+          return displayText();
+        }).appendTo($(".content")[0]);
+        $('<input type="button" value="NEXT" />').click(function(){
+          datas.index = (datas.index + 1 > datas.end - 1) ? datas.start - 1 : datas.index + 1;
+          return displayText();
+        }).appendTo($(".content")[0]);
+        displayText();
+    });
+    var displayText = function(){
+      var text = datas.currents[datas.index];
+      $("#japanese").html(text.japanese);
+      $("#japanese").css({
+        'font-size':'32px'
+      });
+      $("#music").empty();
+
+      var mp3 = $("<div />").attr("class","mp3").css({
+        'height':'20px'
+      });
+      mp3.jmp3({
+          width    : "100%",
+          backcolor: "bf0000",
+          filepath: "http://englishplactice.appspot.com/apis/tts.mp3?q="+text.english
+      });
+
+      var input = $('<textarea id="input" defaultValue="Please input your answer" />')
+      .focus(function() {
+        if($(this).html() == $(this).attr('defaultValue')){
+          $(this).empty();
+        }
+        $(this).css({'color':'#000'});
+        $("#result").empty();
+      }).blur(function() {
+        if($.trim($(this).html()) == "") {
+          $(this).html($(this).attr('defaultValue'));
+          $(this).css({'color':'#ddd'});
+        }
+      }).
+      css({
+        'border':'1px solid',
+        'font-size':'14px',
+        'color':'#bf0000',
+        'width':'90%'
+      }).html("Please input your answer").appendTo($("#music"));
+      var check = $('<input type="button" value="CHECK" />').click(function(){
+        if($("#input").val() == $("#input").attr('defaultValue')){
+          $("#input").val("");
+        }
+        $("#result").empty();
+        $("#result").html(
+          diffString(
+            datas.currents[datas.index].english,
+            $("#input").val()
+          )
+        );
+      });
+      mp3.appendTo($("#music"));
+      input.appendTo($("#music"));
+      check.appendTo($("#music"));
+      $('<div id="result" />').css({
+        'width':'100%',
+        'font-size':'18px',
+        'background-color':'#ddd'
+      }).appendTo($("#music"));
+    };
+  });
+  </script>
+</body>
+</html>

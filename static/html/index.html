@@ -168,9 +168,10 @@
       };
       var goNext = function(e){
           var englishTerm  = e.data.shuffled[e.data.index];
+          /*
           $("a#english_term_"+e.data.pageId+" span.ui-btn-inner span.ui-btn-text").
           css('font-size','32px').
-          html("NEXT");
+          html("NEXT");*/
 
           $("p#japanese_"+e.data.pageId).
           html(e.data.en2ja[englishTerm]);

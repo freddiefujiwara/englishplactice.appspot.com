@@ -8,6 +8,10 @@ handlers:
   static_files: static/html/index.html
   upload: static/html/index.html
 
+- url: /d
+  static_files: static/html/duo.html
+  upload: static/html/duo.html
+
 - url: /data/aa.csv
   static_files: static/data/aa.csv
   upload: static/data/aa.csv
@@ -15,3 +19,22 @@ handlers:
 - url: /data/bb.csv
   static_files: static/data/bb.csv
   upload: static/data/bb.csv
+
+- url: /crons/.*
+  script: crons.py
+  login: admin
+
+- url: /apis/.*
+  script: apis.py
+
+- url: /swfs
+  static_dir: swfs
+
+- url: /javascripts
+  static_dir: javascripts
+
+- url: /stylesheets
+  static_dir: stylesheets
+
+- url: /images
+  static_dir: images

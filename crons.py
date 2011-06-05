@@ -5,6 +5,7 @@ from google.appengine.ext.webapp import util
 from google.appengine.ext import db
 from django.utils import simplejson
 import urllib
+import re
 import gdata.spreadsheet.text_db
 
 class Text(db.Model):
@@ -20,6 +21,7 @@ class CrawlSpread:
       table = db.GetTables(name=u'root')[0]
       for record in table.GetRecords(1, 999999999):
       	text = Text.gql('WHERE text_id = :1',int(record.content[u"通し番号"])).get()
+        record.content[u"英語"] = re.compile('"').sub("",record.content[u"英語"])
       	if text is None:
           text = Text(text_id=int(record.content[u"通し番号"]),japanese=record.content[u"日本語"],english=record.content[u"英語"])
       	else:
