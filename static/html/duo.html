@@ -146,8 +146,8 @@
         $("#result").empty();
         $("#result").html(
           diffString(
-            datas.currents[datas.index].english,
-            $("#input").val()
+            $("#input").val(),
+            datas.currents[datas.index].english
           )
         );
       });
