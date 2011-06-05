@@ -105,7 +105,7 @@
     });
     var displayText = function(){
       var text = datas.currents[datas.index];
-      $("#japanese").html(text.japanese);
+      $("#japanese").html(text.id+":"+text.japanese+"("+(datas.index+1)+"/"+(datas.end-datas.start+1)+")");
       $("#japanese").css({
         'font-size':'32px'
       });
@@ -122,14 +122,14 @@
 
       var input = $('<textarea id="input" defaultValue="Please input your answer" />')
       .focus(function() {
-        if($(this).html() == $(this).attr('defaultValue')){
-          $(this).empty();
+        if($(this).val() == $(this).attr('defaultValue')){
+          $(this).val("");
         }
         $(this).css({'color':'#000'});
         $("#result").empty();
       }).blur(function() {
-        if($.trim($(this).html()) == "") {
-          $(this).html($(this).attr('defaultValue'));
+        if($.trim($(this).val()) == "") {
+          $(this).val($(this).attr('defaultValue'));
           $(this).css({'color':'#ddd'});
         }
       }).
