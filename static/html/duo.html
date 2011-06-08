@@ -39,10 +39,7 @@
         <div id="nav"></div>
       </div>
 
-      <div class="content">
-        <span id="japanese"></span>
-
-        <div id="music"></div>
+      <div id="content">
       </div>
     </div>
   </div>
@@ -67,47 +64,76 @@
     return this;
   };
   $(document).ready(function(){
-    //initialize
+    //initializer
     $.getJSON("http://englishplactice.appspot.com/apis/texts.js?callback=?").then(function(data){
+      //Get data from API
       datas.texts = data;
-      datas.start = 1;
-      datas.end   = 30;
+      //Culculate max
       datas.max = Math.max.apply(null,$.map(data,function(text,index){
         return text.id;
       }));
-      var start = $("<select />");
-      var end = $("<select />");
+
+      //Make START END select boxes
+      var start = $("<select />").attr("id","start");
+      var end   = $("<select />").attr("id","end");
       for(var i = 1 ; i < datas.max ; i++){
         start.append($("<option value='"+i+"'>"+i+"<\/option>"));
         end.append($("<option value='"+i+"'>"+i+"<\/option>"));
       }
-      start.val(datas.start);
-      end.val(datas.end);
       $("#nav").
       append($("<label for='start'>START:<\/label>")).
       append(start).
       append($("<label for='end'>END:<\/label>")).
       append(end);
+
+      //Set Event Handler
+      start.val(31).change(changeStartEnd).keyup(changeStartEnd);
+      end.val(60).change(changeStartEnd).keyup(changeStartEnd);
+      changeStartEnd();
+    });
+    //START - END Change Event Handler
+    var changeStartEnd = function(){
+      //validate START AND END
+      var start = $("#start");
+      var end   = $("#end");
+      datas.start = start.val();
+      datas.end   = end.val();
+      if(datas.end < datas.start){
+        datas.end = datas.start;
+      }
+      start.val(datas.start);
+      end.val(datas.end);
+
+      //Content clear 
+      $("#content").empty().
+      append($('<span id="japanese" />')).
+      append($('<div id="music" />'));
+
+      //SELECT * FROM english_texts WHERE BETTWEEN :START AND : END
+      //and shuffle
       datas.currents = $.grep(datas.texts,function(text,index){
         return datas.start <= text.id && text.id <= datas.end;
       }).shuffle();
       datas.index=0;
-    }).then(function(){
-        $('<input type="button" value="PREVIOUS" />').click(function(){
-          datas.index = (datas.index - 1 < datas.start - 1) ? datas.end  - 1: datas.index - 1;
-          return displayText();
-        }).appendTo($(".content")[0]);
-        $('<input type="button" value="NEXT" />').click(function(){
-          datas.index = (datas.index + 1 > datas.end - 1) ? datas.start - 1 : datas.index + 1;
-          return displayText();
-        }).appendTo($(".content")[0]);
-        displayText();
-    });
+
+      //PREVIOUS NEXT buttons
+      $('<input type="button" value="PREVIOUS" class="button" />').click(function(){
+        datas.index = 0 == datas.index ? (datas.end - datas.start) : datas.index - 1;
+        return displayText();
+      }).appendTo($("#content"));
+      $('<input type="button" value="NEXT" class="button" />').click(function(){
+        datas.index = (datas.index == (datas.end - datas.start)) ? 0 : datas.index + 1;
+        return displayText();
+      }).appendTo($("#content"));
+
+      displayText();
+    }
+    //Content View 
     var displayText = function(){
       var text = datas.currents[datas.index];
       $("#japanese").html(text.id+":"+text.japanese+"("+(datas.index+1)+"/"+(datas.end-datas.start+1)+")");
       $("#japanese").css({
-        'font-size':'32px'
+        'font-size':'24px'
       });
       $("#music").empty();
 
