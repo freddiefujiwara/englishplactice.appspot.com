@@ -145,30 +145,27 @@
           backcolor: "bf0000",
           filepath: "http://englishplactice.appspot.com/apis/tts.mp3?q="+text.english
       });
+      var hideInputDefault = function(){
+        if($("#input").val() == $("#input").attr("title")){
+          $("#input").val("");
+          $("#input").css({
+            'color':'black'
+          });
+        }
+      }
 
-      var input = $('<textarea id="input" defaultValue="Please input your answer" />')
-      .focus(function() {
-        if($(this).val() == $(this).attr('defaultValue')){
-          $(this).val("");
-        }
-        $(this).css({'color':'#000'});
-        $("#result").empty();
-      }).blur(function() {
-        if($.trim($(this).val()) == "") {
-          $(this).val($(this).attr('defaultValue'));
-          $(this).css({'color':'#ddd'});
-        }
-      }).
+      var input = $('<textarea id="input" />').
+      attr('title','Please Input your answer').
+      focus(hideInputDefault).
+      val('Please Input your answer').
       css({
         'border':'1px solid',
         'font-size':'14px',
-        'color':'#bf0000',
-        'width':'90%'
-      }).html("Please input your answer").appendTo($("#music"));
+        'width':'90%',
+        'color':'#999'
+      }).appendTo($("#music"));
       var check = $('<input type="button" value="CHECK" />').click(function(){
-        if($("#input").val() == $("#input").attr('defaultValue')){
-          $("#input").val("");
-        }
+        hideInputDefault();
         $("#result").empty();
         $("#result").html(
           diffString(
@@ -179,6 +176,33 @@
       });
       mp3.appendTo($("#music"));
       input.appendTo($("#music"));
+      if(navigator.userAgent.match("Chrome")){
+      	$('<input type="text" />').
+      	attr("id","speechInput").
+      	attr("spellcheck","false").
+      	attr("autocomplete","off").
+      	attr("autocorrect","off").
+      	attr("x-webkit-speech","x-webkit-speech").
+      	attr("speech","speech").
+      	attr("lang","en_US").
+      	css({
+      		'position'  :'relative',
+      		'right'     :'0px',
+      		'bottom'    :'0px',
+      		'outline'   :'none',
+      		'border'    :'none',
+      		'background':'rgba(0,0,255,0)',
+      		'color'     :'rgba(0,0,255,0)',
+      		'width'     :'32px',
+      		'font-size' :'32px'
+      	}).
+      	click(hideInputDefault).
+      	bind("webkitspeechchange",function(){
+      	  var currentVal = $("#input").val();
+      	  var speechVal  = $(this).val();
+          $("#input").val($.trim(currentVal + " " + speechVal));
+      	}).appendTo($("#music"));
+      }
       check.appendTo($("#music"));
       $('<div id="result" />').css({
         'width':'100%',
