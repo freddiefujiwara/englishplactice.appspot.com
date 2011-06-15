@@ -56,6 +56,8 @@
 "http://ejohn.org/files/jsdiff.js">
 </script><script type="text/javascript" src=
 "javascripts/jquery.jmp3.js">
+</script>
+ <script src="https://www.google.com/jsapi?key=ABQIAAAA5YO-d6twBtFndXhSuT971BTqIE9gdu0sWDTVmsGhgPqG9-GtnhROLXmgQsXDsCyE4IlZ4VpWltm9eA" type="text/javascript">
 </script><script type="text/javascript">
 //<![CDATA[
   var datas = {'min':1,'max':1,'texts':null};
@@ -63,6 +65,7 @@
     for (var j, x, i = this.length; i; j = parseInt(Math.random() * i), x = this[--i], this[i] = this[j], this[j] = x);
     return this;
   };
+  google.load("language","1");
   $(document).ready(function(){
     //initializer
     $.getJSON("http://englishplactice.appspot.com/apis/texts.js?callback=?").then(function(data){
@@ -76,7 +79,7 @@
       //Make START END select boxes
       var start = $("<select />").attr("id","start");
       var end   = $("<select />").attr("id","end");
-      for(var i = 1 ; i < datas.max ; i++){
+      for(var i = 1 ; i <= datas.max ; i++){
         start.append($("<option value='"+i+"'>"+i+"<\/option>"));
         end.append($("<option value='"+i+"'>"+i+"<\/option>"));
       }
@@ -86,9 +89,20 @@
       append($("<label for='end'>END:<\/label>")).
       append(end);
 
+      var hash = location.hash;
+      var maches = null;
+      var defaultStart = 61;
+      var defaultEnd   = 90;
+      if(hash){ 
+        maches = hash.match(/([0-9]+)-([0-9]+)/);
+        if(maches){
+      	 defaultStart = parseInt(maches[1]);
+      	 defaultEnd   = parseInt(maches[2]);
+      	}
+      }
       //Set Event Handler
-      start.val(61).change(changeStartEnd).keyup(changeStartEnd);
-      end.val(90).change(changeStartEnd).keyup(changeStartEnd);
+      start.val(defaultStart).change(changeStartEnd).keyup(changeStartEnd);
+      end.val(defaultEnd).change(changeStartEnd).keyup(changeStartEnd);
       changeStartEnd();
     });
     //START - END Change Event Handler
@@ -98,7 +112,7 @@
       var end   = $("#end");
       datas.start = start.val();
       datas.end   = end.val();
-      if(datas.end < datas.start){
+      if(parseInt(datas.end) < parseInt(datas.start)){
         datas.end = datas.start;
       }
       start.val(datas.start);
@@ -126,10 +140,13 @@
         return displayText();
       }).appendTo($("#content"));
 
+      location.hash=datas.start+"-"+datas.end;
       displayText();
     }
     //Content View 
     var displayText = function(){
+      datas.translations = [];
+      datas.pureTranslation = null;
       var text = datas.currents[datas.index];
       $("#japanese").html(text.id+":"+text.japanese+"("+(datas.index+1)+"/"+(datas.end-datas.start+1)+")");
       $("#japanese").css({
@@ -146,6 +163,7 @@
           filepath: "http://englishplactice.appspot.com/apis/tts.mp3?q="+text.english
       });
       var hideInputDefault = function(){
+      	$("#result").empty();
         if($("#input").val() == $("#input").attr("title")){
           $("#input").val("");
           $("#input").css({
@@ -173,6 +191,44 @@
             datas.currents[datas.index].english
           )
         );
+        var pureTranslation = $("<div />");
+        var ul = $("<ul />");
+        pureTranslation.appendTo($("#result"));
+        ul.appendTo($("#result"));
+        if(null == datas.pureTranslation || "" == datas.pureTranslation){
+            google.language.translate(datas.currents[datas.index].english,"en","ja",function(result){
+              if(result.translation){
+              	datas.pureTranslation = result.translation;
+              	pureTranslation.html(datas.pureTranslation);
+              }
+            });
+        }else{
+              	pureTranslation.html(datas.pureTranslation);
+        }
+        if(datas.translations && 0 == datas.translations.length){
+          $.each($.unique($.grep($.map(datas.currents[datas.index].english.split(/[^A-Za-z']/),
+                function(word){
+                	return $.trim(word);
+                }),
+          	function(word){
+          		return word.match(/^[a-zA-Z']+$/);
+          })),function(index,word){
+            if(word.length < 5 ) return;
+            google.language.translate(word,"en","ja",function(result){
+              if(result.translation){
+              	datas.translations.push({
+              		'english':word,
+              		'japanese':result.translation
+              	});
+              	$("<li />").html(word+":"+result.translation).appendTo(ul);
+              }
+            });
+          });
+        }else{
+          $.each(datas.translations,function(index,translation){
+              	$("<li />").html(translation.english+":"+translation.japanese).appendTo(ul);
+          });
+        }
       });
       mp3.appendTo($("#music"));
       input.appendTo($("#music"));
